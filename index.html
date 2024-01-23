@@ -5,224 +5,385 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fighting Click Simulator</title>
     <style>
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            height: 100vh;
-            margin: 0;
-            background: linear-gradient(to right, #1a1a1a, #333333);
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
-        }
 
-        .menu-container, .level-selection, .game-container, #about-container, .instruction-container {
-            text-align: center;
-            z-index: 1;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-            margin: 20px;
-        }
+body {
+    display: flex;
+    margin: 0;
+    background: linear-gradient(to right, #1a1a1a, #333333);
+    font-family: 'Arial', sans-serif;
+    overflow: hidden;
+    background-image: url(battlebackground.png);
+    position: relative; 
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
 
-        button {
-            margin: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-        }
+.menu-container, .level-selection, .game-container, #about-container, .instruction-container {
+    text-align: center;
+    z-index: 1;
+    background: rgba(173, 216, 230, 0.329);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    margin: 20px;
+}
 
-        .player, .enemy {
-            width: 100px;
-            height: 100px;
-            background-color: green;
-            margin: 10px;
-            position: relative;
-            border: 2px solid #333;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-        }
+button {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: rgba(40, 63, 194, 0.589);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.3s, opacity 0.3s;
+}
 
-        .health-bar {
-            width: 100%;
-            height: 10px;
-            background-color: red;
-            position: absolute;
-            bottom: 0;
-            border-radius: 0 0 8px 8px;
-        }
+button:hover {
+    background-color: rgb(207, 44, 44);
+    opacity: 0.9;
+}
 
-        .attack-button, #next-level-button, #back-to-menu-button {
-            margin-top: 10px;
-        }
+.player, .enemy {
+    width: 100px;
+    height: 100px;
+    background-color: rgb(32, 182, 241);
+    margin: 10px;
+    position: relative;
+    border: 2px solid #07f7ff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: flex-end;
+    color: white;
+    font-weight: bold;
+}
 
-        .hidden {
-            display: none;
-        }
+.health-bar {
+    width: 100%;
+    height: 10px;
+    background-color: red;
+    position: absolute;
+    bottom: 0;
+    border-radius: 0 0 8px 8px;
+}
 
-        #level-indicator {
-            font-size: 24px;
-            margin: auto;
-            color: #333;
-        }
+.attack-button, #next-level-button, #back-to-menu-button {
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
 
-        #player-container, #enemy-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+.hidden {
+    display: none;
+}
 
-        #game-container {
-            position: relative;
-        }
+#level-indicator {
+    font-size: 50px;
+    margin: auto;
+    color: #001c97;
+}
 
-        #game-messages {
-            margin-top: 20px;
-            color: #FF5722;
-        }
+#player-container, #enemy-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-        .pop-up {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #fff;
-            padding: 20px;
-            border: 2px solid #4CAF50;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            display: none;
-        }
+.life-label {
+    font-size: 15px; 
+    margin-top: 5px;
+    color: red;
+    position: absolute;
+    bottom: -20px;
+}
 
-        .pop-up h2 {
-            color: #4CAF50;
-        }
+.player .life-label,
+.enemy .life-label {
+    position: absolute;
+    order: 1;
+}
 
-        .pop-up button {
-            margin-top: 10px;
-            background-color: #4CAF50;
-            color: white;
-        }
+.game-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
 
-        h1 {
-            font-size: 3em;
-            text-align: center;
-            text-shadow: 0 0 10px #4CAF50, 0 0 20px #4CAF50, 0 0 30px #4CAF50;
-            margin-bottom: 0;
-            color: #ffcc00;
-            z-index: 1;
-            animation: glow 2s linear infinite alternate;
-        }
+.attack-button {
+    background-color: #FF5722;
+    color: white;
+    padding: 15px 30px;
+    font-size: 20px;
+    border: 2px solid #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
 
-        @keyframes glow {
-            from {
-                color: #4CAF50;
-            }
-            to {
-                color: #ffcc00;
-            }
-        }
+.attack-button:hover {
+    background-color: #FF7043; 
+    transform: scale(1.05);
+}
 
-        #about-container {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #fff;
-            padding: 20px;
-            border: 2px solid #4CAF50;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            text-align: center;
-        }
+.attack-button:active {
+    transform: scale(0.95);
+}
 
-        #about-container h2 {
-            color: #4CAF50;
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
+.attack-button, #next-level-button, #back-to-menu-button {
+    margin-top: 20px;
+    margin-bottom: 30px;
+    z-index: 1; 
+}
 
-        #about-container p {
-            margin: 0;
-            font-size: 16px;
-            color: #333;
-        }
+#game-messages {
+    margin-top: 20px;
+    color: #FF5722;
+}
 
-        #about-container p:first-child {
-            margin-bottom: 20px;
-        }
+.pop-up {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #acecf5;
+    padding: 20px;
+    border: 2px solid #2f4fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: none;
+}
 
-        #about-container p:not(:last-child) {
-            margin-bottom: 8px;
-        }
+.pop-up h2 {
+    color: rgba(70, 130, 180, 0.8);
+}
 
-        .instruction-container {
-            text-align: left;
-            margin-top: 20px;
-            display: none;
-        }
+.pop-up button {
+    margin-top: 10px;
+    background-color: rgba(70, 130, 180, 0.8);
+    color: white;
+}
 
-        .instruction-image {
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 10px;
-        }
+h1 {
+    font-size: 3em;
+    text-align: center;
+    text-shadow: 0 0 10px #000000, 0 0 20px #1bb2ee, 0 0 30px #22dbdb;
+    margin-bottom: 0;
+    color: #ffcc00;
+    z-index: 1;
+    animation: glow 2s linear infinite alternate;
+}
 
+@keyframes glow {
+    from {
+        color: #337ab7;
+    }
+    to {
+        color: #5bc0de;
+    }
+    to{
+        color: white;
+    }
+}
 
-        #about-container {
-        overflow-y: scroll;
-        max-height: 60vh;
-        text-align: center;
-        }
+#about-container {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #00d9ff49;
+    padding: 20px;
+    border: 2px solid #422efa;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    text-align: center;
+}
 
-        
-        #mechanics-container {
-        overflow-y: scroll;
-        max-height: 60vh;
-        text-align: center;
-        }
+#about-container h2 {
+    color: #4CAF50;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
 
-        .mechanics-content {
-            margin-top: 20px;
-            text-align: center;
-            padding: 15px;
-            border: 1px solid #333;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
+#about-container p {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+}
+
+#about-container p:first-child {
+    margin-bottom: 20px;
+}
+
+#about-container p:not(:last-child) {
+    margin-bottom: 8px;
+}
+
+.instruction-container {
+    text-align: left;
+    margin-top: 20px;
+    display: none;
+}
+
+.instruction-image {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+#about-container{
+    overflow-y: scroll;
+    max-height: 60vh;
+    text-align: center;
+}
+
+#mechanics-container {
+    overflow-y: scroll;
+    max-height: 60vh;
+    text-align: center;
+}
+
+.mechanics-content {
+    margin-top: 20px;
+    text-align: center;
+    padding: 15px;
+    border: 1px solid #23a1f5;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.instruction-image {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#story-container{
+    text-align: center;
+}
+
+@media only screen and (max-width: 600px) {
+    .menu-container, .level-selection, .game-container, #about-container, .instruction-container {
+        margin: 10px;
+    }
+
+    button {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+
+    .player, .enemy {
+        width: 80px;
+        height: 80px;
+        margin: 5px;
+        font-size: 12px;
+    }
+
+    .health-bar {
+        height: 8px;
+    }
+
+    .attack-button {
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    #about-container {
+        padding: 10px;
+    }
     
-        .instruction-image {
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 10px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
+    .pop-up {
+        padding: 15px;
+    }
+
+    #game-messages {
+        font-size: 14px;
+    }
+}
+
+@media only screen and (min-width: 601px) and (max-width: 1024px) {
+    .player, .enemy {
+        width: 90px;
+        height: 90px;
+        font-size: 14px;
+    }
+
+    .attack-button {
+        padding: 12px 25px;
+        font-size: 18px;
+    }
+
+    #level-indicator {
+        font-size: 40px;
+    }
+}
+
+@media only screen and (min-width: 1025px) {
+    .player, .enemy {
+        width: 120px;
+        height: 120px;
+        font-size: 18px;
+    }
+
+    .attack-button {
+        padding: 15px 30px;
+        font-size: 24px;
+    }
+
+    #level-indicator {
+        font-size: 50px;
+    }
+}
+
+@media only screen and (min-width: 1441px) {
+    .player, .enemy {
+        width: 150px;
+        height: 150px;
+        font-size: 22px;
+    }
+
+    .attack-button {
+        padding: 18px 35px;
+        font-size: 28px;
+    }
+
+    #level-indicator {
+        font-size: 60px;
+    }
+}
+
+
+
     </style>
 </head>
 <body>
 
 <div class="menu-container">
     <h1>Fighting Click Simulator</h1>
-    <button onclick="showLevelSelection()">Play</button>
+    <button onclick="showStory()">Play</button>
     <br>
     <button onclick="showAbout()">About Developer</button>
-    <br>
-    <button onclick="showStory()">Story</button>
     <br>
     <button onclick="showMechanics()">Mechanics</button>
 </div>
@@ -243,14 +404,20 @@
     <div id="player-container" class="player">
         <div class="health-bar" id="player-health"></div>
         Player
+        <div class="life-label">Life</div>
     </div>
+
+    
 
     <div id="enemy-container" class="enemy">
         <div class="health-bar" id="enemy-health"></div>
         Enemy
+        <div class="life-label">Life</div>
     </div>
+    
+    
 
-    <button class="attack-button" onclick="attack()">Attack</button>
+    <button id="attack-button" class="attack-button" onclick="attack()" style="background-color: #FF5722;">Attack</button>
     <button id="next-level-button" class="hidden" onclick="nextLevel()">Next Level</button>
     <button id="back-to-menu-button" class="hidden" onclick="backToMenu()">Back to Menu</button>
 
@@ -289,6 +456,8 @@
 <div id="story-container" class="instruction-container hidden">
     <h1>Storyline</h1>
     <p></p>
+    <button onclick="showLevelSelection()">Play</button>
+    <br>
     <button onclick="backToMenuFromInstructions()">Back to Menu</button>
 </div>
 
@@ -349,6 +518,7 @@
 
 
 <script>
+
     let playerHealth, enemyHealth, currentLevel;
 
     function showLevelSelection() {
@@ -400,22 +570,34 @@
         updateHealthBars();
     }
 
+    function hideAttackButton() {
+    document.getElementById('attack-button').style.display = 'none';
+    }
+
+    function hidelevelindicator(){
+        document.getElementById('level-indicator').style.display = 'none';
+    }
+
     function showCongratulationsPopUp() {
-        hidePlayerEnemyContainers();
+        hidelevelindicator();
         document.getElementById('congratulations-pop-up').style.display = 'block';
+        hidePlayerEnemyContainers();
+        hideAttactButton();
         
     }
 
     function showGameOverPopUp() {
-        hidePlayerEnemyContainers();
+        hidelevelindicator();
         document.getElementById('game-over-pop-up').style.display = 'block';
-        
+        hidePlayerEnemyContainers();
+        hideAttackButton();
     }
 
     function showCompletionPopUp() {
-        hidePlayerEnemyContainers();
         document.getElementById('completion-pop-up').style.display = 'block';
-        
+        hidePlayerEnemyContainers();
+        hideAttackButton();
+        hidelevelindicator();
     }
 
     function hidePlayerEnemyContainers() {
@@ -448,6 +630,7 @@
     function resetGame() {
         playerHealth = 100;
         enemyHealth = 100;
+        document.getElementById('level-indicator').style.display = 'inline-block';
         document.querySelector('.attack-button').style.display = 'inline-block';
         document.getElementById('next-level-button').style.display = 'none';
         document.getElementById('back-to-menu-button').style.display = 'none';
