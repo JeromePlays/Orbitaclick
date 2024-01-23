@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fighting Click Simulator</title>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to right, #1a1a1a, #333333);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        .menu-container, .level-selection, .game-container, #about-container, .instruction-container {
+            text-align: center;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            margin: 20px;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .player, .enemy {
+            width: 100px;
+            height: 100px;
+            background-color: green;
+            margin: 10px;
+            position: relative;
+            border: 2px solid #333;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .health-bar {
+            width: 100%;
+            height: 10px;
+            background-color: red;
+            position: absolute;
+            bottom: 0;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .attack-button, #next-level-button, #back-to-menu-button {
+            margin-top: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #level-indicator {
+            font-size: 24px;
+            margin: auto;
+            color: #333;
+        }
+
+        #player-container, #enemy-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #game-container {
+            position: relative;
+        }
+
+        #game-messages {
+            margin-top: 20px;
+            color: #FF5722;
+        }
+
+        .pop-up {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+        }
+
+        .pop-up h2 {
+            color: #4CAF50;
+        }
+
+        .pop-up button {
+            margin-top: 10px;
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3em;
+            text-align: center;
+            text-shadow: 0 0 10px #4CAF50, 0 0 20px #4CAF50, 0 0 30px #4CAF50;
+            margin-bottom: 0;
+            color: #ffcc00;
+            z-index: 1;
+            animation: glow 2s linear infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                color: #4CAF50;
+            }
+            to {
+                color: #ffcc00;
+            }
+        }
+
+        #about-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        #about-container h2 {
+            color: #4CAF50;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        #about-container p {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        #about-container p:first-child {
+            margin-bottom: 20px;
+        }
+
+        #about-container p:not(:last-child) {
+            margin-bottom: 8px;
+        }
+
+        .instruction-container {
+            text-align: left;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .instruction-image {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+
+
+        #mechanics-container {
+        overflow-y: scroll;
+        max-height: 60vh;
+        text-align: center;
+    }
+
+    .mechanics-content {
+        margin-top: 20px;
+        text-align: center;
+        padding: 15px;
+        border: 1px solid #333;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .instruction-image {
+        max-width: 100%;
+        height: auto;
+        margin-bottom: 10px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    </style>
+</head>
+<body>
+
+<div class="menu-container">
+    <h1>Fighting Click Simulator</h1>
+    <button onclick="showLevelSelection()">Play</button>
+    <br>
+    <button onclick="showAbout()">About Developer</button>
+    <br>
+    <button onclick="showStory()">Story</button>
+    <br>
+    <button onclick="showMechanics()">Mechanics</button>
+</div>
+
+<div class="level-selection" style="display: none;">
+    <button onclick="startLevel(1)">Level 1</button>
+    <button onclick="startLevel(2)">Level 2</button>
+    <button onclick="startLevel(3)">Level 3</button>
+    <br>
+    <button onclick="backToMenu()">Back to Menu</button>
+</div>
+
+<div class="game-container" style="display: none;">
+    <div id="level-indicator"></div>
+
+    <div id="game-messages"></div>
+
+    <div id="player-container" class="player">
+        <div class="health-bar" id="player-health"></div>
+        Player
+    </div>
+
+    <div id="enemy-container" class="enemy">
+        <div class="health-bar" id="enemy-health"></div>
+        Enemy
+    </div>
+
+    <button class="attack-button" onclick="attack()">Attack</button>
+    <button id="next-level-button" class="hidden" onclick="nextLevel()">Next Level</button>
+    <button id="back-to-menu-button" class="hidden" onclick="backToMenu()">Back to Menu</button>
+
+    <div class="pop-up" id="congratulations-pop-up">
+        <h2>Congratulations!</h2>
+        <p>You defeated the enemy!</p>
+        <button onclick="nextLevel()">Next Level</button>
+        <button onclick="backToMenu()">Back to Menu</button>
+    </div>
+
+    <div class="pop-up" id="game-over-pop-up">
+        <h2>Game Over</h2>
+        <p>You lost the game.</p>
+        <button onclick="backToMenu()">Back to Menu</button>
+        <button onclick="playAgain()">Play Again</button>
+    </div>
+
+    <div class="pop-up" id="completion-pop-up">
+        <h2>Congratulations!</h2>
+        <p>You completed all levels!</p>
+        <button onclick="backToMenu()">Back to Menu</button>
+    </div>
+</div>
+
+<div id="about-container" class="hidden">
+    <h1>About the Developers</h1>
+    <h1>This game was created by:</h1>
+    <h1>Jerome Orbita</h1>
+    <h1>Monica Daang</h1>
+    <h1>Krissia Camelle</h1>
+    <h1>Aki Dela Cruz</h1>
+    <h1>Adriano Zaira</h1>
+    <button onclick="backToMenuFromAbout()">Back to Menu</button>
+</div>
+
+<div id="story-container" class="instruction-container hidden">
+    <h1>Storyline</h1>
+    <p></p>
+    <button onclick="backToMenuFromInstructions()">Back to Menu</button>
+</div>
+
+<div id="mechanics-container" class="instruction-container hidden">
+    <h1>Mechanics of the Game</h1>
+    <div class="mechanics-content">
+        <img src="Menupage.PNG" alt="Mechanics Image 1" class="instruction-image">
+        <h1>Menu Page</h1>
+        <p>Play Button: To start the game.</p>
+        <p>About Developers: The People who make this game.</p>
+        <p>Story: Read the story before to start the game.</p>
+        <p>Mechanics: To see how the game works please follow the game instructions.</p>
+    </div>
+    <div class="mechanics-content">
+        <img src="Levelsection.PNG" alt="Mechanics Image 2" class="instruction-image">
+        <h1>Level Page</h1>
+        <p>This is level selection just choose any levels here and free to play the game.</p>
+    </div>
+    <div class="mechanics-content">
+        <img src="Gamesection.PNG" alt="Mechanics Image 3" class="instruction-image">
+        <h1>Game Page</h1>
+        <p>This is the game UI its simple but try to win.</p>
+    </div>
+    <div class="mechanics-content">
+        <img src="Player.PNG" alt="Mechanics Image 4" class="instruction-image">
+        <h1>Player Avatar</h1>
+        <p>This is your avatar and your health bar.</p>
+    </div>
+    <div class="mechanics-content">
+        <img src="enemy.PNG" alt="Mechanics Image 5" class="instruction-image">
+        <h1>Enemy Avatar</h1>
+        <p>This is the enemy avatar and health bar.</p>
+    </div>
+    <div class="mechanics-content">
+        <img src="attack.PNG" alt="Mechanics Image 6" class="instruction-image">
+        <h1>Attacking</h1>
+        <p>This is where you can attack the enemy first reach 0 health bar lose.</p>
+    </div>
+    <div class="mechanics-content">
+        <img src="Congrats.PNG" alt="Mechanics Image 7" class="instruction-image">
+        <h1>Congratulation message</h1>
+        <p>Once you defeated the every enemy it will show and make you go to the next level just click "Next Level".</p>
+    </div>
+    <div class="mechanics-content">
+        <img src="Gameover.PNG" alt="Mechanics Image 8" class="instruction-image">
+        <h1>Game Over</h1>
+        <p>Once you lose this will show and ask you to back to menu or continue to play just click "Play Again".</p>
+    </div>
+    <div class="mechanics-content">
+        <img src="Completedgame.PNG" alt="Mechanics Image 9" class="instruction-image">
+        <h1>Clearing Stages</h1>
+        <p>Clear three stage (3) to complete the game.</p>
+    </div>
+    
+
+    <button onclick="backToMenuFromInstructions()">Back to Menu</button>
+</div>
+
+
+<script>
+    let playerHealth, enemyHealth, currentLevel;
+
+    function showLevelSelection() {
+        hideAllContainers();
+        hideMenu();
+        document.querySelector('.level-selection').style.display = 'block';
+    }
+
+    function startLevel(level) {
+        currentLevel = level;
+        hideAllContainers();
+        hideMenu();
+        document.querySelector('.game-container').style.display = 'flex';
+        updateLevelIndicator();
+        resetGame();
+    }
+
+    function hideMenu() {
+        document.querySelector('.menu-container').style.display = 'none';
+    }
+
+    function updateLevelIndicator() {
+        document.getElementById('level-indicator').innerText = 'Level ' + currentLevel;
+    }
+
+    function showAbout() {
+        hideAllContainers();
+        document.querySelector('#about-container').style.display = 'block';
+    }
+
+    function attack() {
+        const playerDamage = Math.floor(Math.random() * 10) + 1;
+        const enemyDamage = Math.floor(Math.random() * 10) + 1;
+
+        playerHealth -= enemyDamage;
+        enemyHealth -= playerDamage;
+
+        if (playerHealth <= 0) {
+            showGameOverPopUp();
+        } else if (enemyHealth <= 0) {
+            if (currentLevel === 3) {
+                showCompletionPopUp();
+            } else {
+                showCongratulationsPopUp();
+            }
+        }
+
+        updateHealthBars();
+    }
+
+    function showCongratulationsPopUp() {
+        document.getElementById('congratulations-pop-up').style.display = 'block';
+        hidePlayerEnemyContainers();
+    }
+
+    function showGameOverPopUp() {
+        document.getElementById('game-over-pop-up').style.display = 'block';
+        hidePlayerEnemyContainers();
+    }
+
+    function showCompletionPopUp() {
+        document.getElementById('completion-pop-up').style.display = 'block';
+        hidePlayerEnemyContainers();
+    }
+
+    function hidePlayerEnemyContainers() {
+        document.getElementById('player-container').style.display = 'none';
+        document.getElementById('enemy-container').style.display = 'none';
+    }
+
+    function showPlayerEnemyContainers() {
+        document.getElementById('player-container').style.display = 'flex';
+        document.getElementById('enemy-container').style.display = 'flex';
+    }
+
+    function nextLevel() {
+        if (currentLevel < 3) {
+            currentLevel++;
+            updateLevelIndicator();
+            resetGame();
+        } else {
+            showCongratulationsPopUp();
+            backToMenu();
+        }
+    }
+
+    function backToMenu() {
+        hideAllContainers();
+        document.querySelector('.menu-container').style.display = 'block';
+        resetGame();
+    }
+
+    function resetGame() {
+        playerHealth = 100;
+        enemyHealth = 100;
+        document.querySelector('.attack-button').style.display = 'inline-block';
+        document.getElementById('next-level-button').style.display = 'none';
+        document.getElementById('back-to-menu-button').style.display = 'none';
+        document.getElementById('game-messages').textContent = '';
+        document.getElementById('congratulations-pop-up').style.display = 'none';
+        document.getElementById('game-over-pop-up').style.display = 'none';
+        document.getElementById('completion-pop-up').style.display = 'none';
+        updateHealthBars();
+        showPlayerEnemyContainers();
+    }
+
+    function updateHealthBars() {
+        document.getElementById('player-health').style.width = playerHealth + '%';
+        document.getElementById('enemy-health').style.width = enemyHealth + '%';
+    }
+
+    function playAgain() {
+        closePopUp();
+        resetGame();
+    }
+
+    function closePopUp() {
+        document.getElementById('congratulations-pop-up').style.display = 'none';
+        document.getElementById('game-over-pop-up').style.display = 'none';
+        document.getElementById('completion-pop-up').style.display = 'none';
+    }
+
+    function backToMenuFromAbout() {
+        hideAllContainers();
+        document.querySelector('.menu-container').style.display = 'block';
+    }
+
+    function showStory() {
+        hideAllContainers();
+        document.getElementById('story-container').style.display = 'block';
+        document.querySelector('.menu-container').style.display = 'none';
+    }
+
+    function showMechanics() {
+        hideAllContainers();
+        document.getElementById('mechanics-container').style.display = 'block';
+        document.querySelector('.menu-container').style.display = 'none';
+    }
+
+    function backToMenuFromInstructions() {
+        hideAllContainers();
+        document.querySelector('.menu-container').style.display = 'block';
+    }
+
+    function hideAllContainers() {
+        document.querySelector('.level-selection').style.display = 'none';
+        document.querySelector('.game-container').style.display = 'none';
+        document.getElementById('about-container').style.display = 'none';
+        document.getElementById('story-container').style.display = 'none';
+        document.getElementById('mechanics-container').style.display = 'none';
+    }
+</script>
+
+
+</body>
+</html>
